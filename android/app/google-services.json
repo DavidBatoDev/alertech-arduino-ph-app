@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "634305469439",
+    "project_id": "alertech-3bcd0",
+    "storage_bucket": "alertech-3bcd0.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:634305469439:android:1aa31c9b459cd7ddb365ca",
+        "android_client_info": {
+          "package_name": "com.arduinoph"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDVRzBtAyfqhN7S7BpXAc5qTmd7gqX_urM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
