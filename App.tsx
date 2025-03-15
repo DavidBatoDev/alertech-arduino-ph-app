@@ -7,31 +7,52 @@ import {
   ScrollView, 
   TouchableOpacity,
   Animated,
-  Easing
+  Easing,
+  Alert
 } from 'react-native';
 import { LinearGradient } from 'react-native-linear-gradient';
 import messaging from '@react-native-firebase/messaging';
 
 export default function App(): JSX.Element {
+  // Handle permissions and get token
   async function requestUserPermission() {
     const authStatus = await messaging().requestPermission();
     const enabled =
-        authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
-        authStatus === messaging.AuthorizationStatus.PROVISIONAL;
-    
-    if (enabled) {
-        console.log('Authorization status:', authStatus);
-    }
-}
+      authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+      authStatus === messaging.AuthorizationStatus.PROVISIONAL;
 
-  const getToken = async () => {
-      const token = await messaging().getToken();
-      console.log('Token:', token);
+    if (enabled) {
+      console.log('Authorization status:', authStatus);
+    }
   }
 
+  const getToken = async () => {
+    try {
+      const token = await messaging().getToken();
+      console.log('FCM Token:', token);
+    } catch (error) {
+      console.log('Error getting token:', error);
+    }
+  };
+
+  // Handle foreground and background messages
   useEffect(() => {
-      requestUserPermission();
-      getToken();
+    requestUserPermission();
+    getToken();
+
+    // Foreground message handler
+    const unsubscribe = messaging().onMessage(async remoteMessage => {
+      console.log('Foreground message:', remoteMessage);
+      Alert.alert('New Message', JSON.stringify(remoteMessage));
+    });
+
+    // Background message handler (when app is killed)
+    messaging().setBackgroundMessageHandler(async remoteMessage => {
+      console.log('Background message:', remoteMessage);
+    });
+
+    // Clean up
+    return unsubscribe;
   }, []);
 
   // State for sensor data
