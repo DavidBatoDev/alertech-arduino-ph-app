@@ -8,12 +8,36 @@ import {
   TouchableOpacity,
   Animated,
   Easing,
-  Alert
+  Alert,
+  Vibration 
 } from 'react-native';
 import { LinearGradient } from 'react-native-linear-gradient';
-import messaging from '@react-native-firebase/messaging';
+import messaging, { FirebaseMessagingTypes } from '@react-native-firebase/messaging';
+import notifee, { AndroidImportance, AndroidCategory } from '@notifee/react-native';
+import { setupNotificationChannel } from './src/utils/notificationSetup';
+
+// Alarm sound and vibration
+const showAlarmUI = async (message: FirebaseMessagingTypes.RemoteMessage) => {
+  Vibration.vibrate([500, 1000, 500, 1000], true); // Vibrate pattern
+  Alert.alert(
+    "🚨 Fire Alert!",
+    message.notification?.body ?? 'No message body',
+    [
+      {
+        text: "Dismiss Alarm",
+        onPress: () => {
+          Vibration.cancel();
+        },
+        style: "cancel"
+      }
+    ],
+    { cancelable: false }
+  );
+};
 
 export default function App(): JSX.Element {
+  const [token, setToken] = useState<string | null>(null);
+
   // Handle permissions and get token
   async function requestUserPermission() {
     const authStatus = await messaging().requestPermission();
@@ -29,31 +53,85 @@ export default function App(): JSX.Element {
   const getToken = async () => {
     try {
       const token = await messaging().getToken();
+      setToken(token);
       console.log('FCM Token:', token);
     } catch (error) {
       console.log('Error getting token:', error);
     }
   };
 
-  // Handle foreground and background messages
   useEffect(() => {
-    requestUserPermission();
-    getToken();
+    messaging()
+      .subscribeToTopic('all')
+      .then(() => console.log('Subscribed to topic "all"'));
+  }, []);
 
-    // Foreground message handler
-    const unsubscribe = messaging().onMessage(async remoteMessage => {
-      console.log('Foreground message:', remoteMessage);
-      Alert.alert('New Message', JSON.stringify(remoteMessage));
+
+  useEffect(() => {
+    const unsubscribe = messaging().onMessage(async (remoteMessage) => {
+      console.log('Foreground notification:', remoteMessage);
+  
+      /////////////////////////// Show a regular notification /////////////////////////// 
+      // if (remoteMessage?.data?.type === 'alarm') {
+      //   // Trigger an alarm UI
+      //   showAlarmUI(remoteMessage);
+      // } else {
+      //   // Show a regular notification
+      //   await notifee.displayNotification({
+      //     title: remoteMessage.notification?.title ?? 'No Title',
+      //     body: remoteMessage.notification?.body ?? 'No Body',
+      //     android: {
+      //       channelId: 'alarm_channel',
+      //       sound: 'alarm_sound',
+      //       importance: AndroidImportance.HIGH,
+      //     },
+      //   });
+      // }
+
+      await getToken();
+
+      ///////////////////////////  Show full-screen notification /////////////////////////// 
+      if (remoteMessage?.data?.type === 'alarm') {
+        // When the app is open, show the custom alarm UI
+        showAlarmUI(remoteMessage);
+      } else {
+        // For other types of messages, show a regular notification
+        await notifee.displayNotification({
+          title: remoteMessage.notification?.title ?? 'No Title',
+          body: remoteMessage.notification?.body ?? 'No Body',
+          android: {
+            channelId: 'alarm_channel',
+            sound: 'alarm_sound',
+            importance: AndroidImportance.HIGH,
+          },
+        });
+      }
     });
 
-    // Background message handler (when app is killed)
-    messaging().setBackgroundMessageHandler(async remoteMessage => {
-      console.log('Background message:', remoteMessage);
-    });
-
-    // Clean up
+    setupNotificationChannel();
+  
     return unsubscribe;
   }, []);
+
+  // // Handle foreground and background messages
+  // useEffect(() => {
+  //   requestUserPermission();
+  //   getToken();
+
+  //   // Foreground message handler
+  //   const unsubscribe = messaging().onMessage(async remoteMessage => {
+  //     console.log('Foreground message:', remoteMessage);
+  //     Alert.alert('New Message', JSON.stringify(remoteMessage));
+  //   });
+
+  //   // Background message handler (when app is killed)
+  //   messaging().setBackgroundMessageHandler(async remoteMessage => {
+  //     console.log('Background message:', remoteMessage);
+  //   });
+
+  //   // Clean up
+  //   return unsubscribe;
+  // }, []);
 
   // State for sensor data
   const [temperature, setTemperature] = useState(11.8);
@@ -132,6 +210,7 @@ export default function App(): JSX.Element {
         <View style={styles.headerContainer}>
           <Text style={styles.headerTitle}>Smart Fire & Gas Leak Alert System</Text>
           <Text style={styles.headerSubtitle}>Arduino PH</Text>
+          <Text style={{color: '#FFEB3B'}}> {token}</Text>
         </View>
       </LinearGradient>
 
