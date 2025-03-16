@@ -1,20 +1,27 @@
 import React, { useState, useEffect, JSX } from 'react';
 import { 
-  View, 
-  Text, 
   StyleSheet, 
   StatusBar, 
   ScrollView, 
   TouchableOpacity,
   Animated,
-  Easing,
   Alert,
-  Vibration 
+  Vibration,
+  View
 } from 'react-native';
-import { LinearGradient } from 'react-native-linear-gradient';
+import LinearGradient from 'react-native-linear-gradient';
 import messaging, { FirebaseMessagingTypes } from '@react-native-firebase/messaging';
-import notifee, { AndroidImportance, AndroidCategory } from '@notifee/react-native';
+import notifee, { AndroidImportance } from '@notifee/react-native';
 import { setupNotificationChannel } from './src/utils/notificationSetup';
+import { 
+  Provider as PaperProvider, 
+  Card, 
+  Title, 
+  Paragraph, 
+  Text, 
+  ProgressBar, 
+  List 
+} from 'react-native-paper';
 
 // Alarm sound and vibration
 const showAlarmUI = async (message: FirebaseMessagingTypes.RemoteMessage) => {
@@ -34,6 +41,27 @@ const showAlarmUI = async (message: FirebaseMessagingTypes.RemoteMessage) => {
     { cancelable: false }
   );
 };
+
+  // // Handle foreground and background messages
+  // useEffect(() => {
+  //   requestUserPermission();
+  //   getToken();
+
+  //   // Foreground message handler
+  //   const unsubscribe = messaging().onMessage(async remoteMessage => {
+  //     console.log('Foreground message:', remoteMessage);
+  //     Alert.alert('New Message', JSON.stringify(remoteMessage));
+  //   });
+
+  //   // Background message handler (when app is killed)
+  //   messaging().setBackgroundMessageHandler(async remoteMessage => {
+  //     console.log('Background message:', remoteMessage);
+  //   });
+
+  //   // Clean up
+  //   return unsubscribe;
+  // }, []);
+
 
 export default function App(): JSX.Element {
   const [token, setToken] = useState<string | null>(null);
@@ -66,11 +94,10 @@ export default function App(): JSX.Element {
       .then(() => console.log('Subscribed to topic "all"'));
   }, []);
 
-
   useEffect(() => {
     const unsubscribe = messaging().onMessage(async (remoteMessage) => {
       console.log('Foreground notification:', remoteMessage);
-  
+      
       /////////////////////////// Show a regular notification /////////////////////////// 
       // if (remoteMessage?.data?.type === 'alarm') {
       //   // Trigger an alarm UI
@@ -112,26 +139,6 @@ export default function App(): JSX.Element {
   
     return unsubscribe;
   }, []);
-
-  // // Handle foreground and background messages
-  // useEffect(() => {
-  //   requestUserPermission();
-  //   getToken();
-
-  //   // Foreground message handler
-  //   const unsubscribe = messaging().onMessage(async remoteMessage => {
-  //     console.log('Foreground message:', remoteMessage);
-  //     Alert.alert('New Message', JSON.stringify(remoteMessage));
-  //   });
-
-  //   // Background message handler (when app is killed)
-  //   messaging().setBackgroundMessageHandler(async remoteMessage => {
-  //     console.log('Background message:', remoteMessage);
-  //   });
-
-  //   // Clean up
-  //   return unsubscribe;
-  // }, []);
 
   // State for sensor data
   const [temperature, setTemperature] = useState(11.8);
@@ -202,132 +209,117 @@ export default function App(): JSX.Element {
   };
 
   return (
-    <View style={styles.mainContainer}>
+    <PaperProvider>
       <StatusBar barStyle="light-content" backgroundColor="#D32F2F" />
+      {/* Header with Linear Gradient */}
       <LinearGradient
         colors={['#D32F2F', '#FF5722']}
         style={styles.headerGradient}>
-        <View style={styles.headerContainer}>
-          <Text style={styles.headerTitle}>Smart Fire & Gas Leak Alert System</Text>
+        <Card.Content style={styles.headerContainer}>
+          <Title style={styles.headerTitle}>Smart Fire & Gas Leak Alert System</Title>
           <Text style={styles.headerSubtitle}>Arduino PH</Text>
-          <Text style={{color: '#FFEB3B'}}> {token}</Text>
-        </View>
+          <Text style={{ color: '#FFEB3B' }}>{token}</Text>
+        </Card.Content>
       </LinearGradient>
 
       <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
         {/* Card: Temperature & Humidity */}
-        <View style={styles.card}>
-          <View style={styles.cardHeader}>
-            <Text style={styles.cardTitle}>Current Readings</Text>
-            <View style={styles.updateIndicator} />
-          </View>
-          
-          <View style={styles.readingsRow}>
-            <View style={styles.readingItem}>
-              <Text style={styles.readingLabel}>Temperature</Text>
-              <Animated.Text 
-                style={[
-                  styles.readingValue, 
-                  { 
-                    opacity: tempOpacity,
-                    color: temperature > 80 ? '#FF5722' : '#1976D2'
-                  }
-                ]}>
-                {temperature.toFixed(1)}°F
-              </Animated.Text>
-              <View style={[styles.indicatorBar, {backgroundColor: temperature > 80 ? '#FFCDD2' : '#BBDEFB'}]}>
-                <View 
+        <Card style={styles.card}>
+          <Card.Title 
+            title="Current Readings" 
+            right={() => <View style={styles.updateIndicator} />} 
+          />
+          <Card.Content>
+            <View style={styles.readingsRow}>
+              <View style={styles.readingItem}>
+                <Text style={styles.readingLabel}>Temperature</Text>
+                <Animated.Text 
                   style={[
-                    styles.indicatorFill, 
-                    {
-                      width: `${Math.min(100, (temperature - 60) * 2.5)}%`,
-                      backgroundColor: temperature > 80 ? '#F44336' : '#2196F3'
+                    styles.readingValue, 
+                    { 
+                      opacity: tempOpacity,
+                      color: temperature > 80 ? '#FF5722' : '#1976D2'
                     }
-                  ]} 
+                  ]}>
+                  {temperature.toFixed(1)}°F
+                </Animated.Text>
+                {/* Using ProgressBar for indicator */}
+                <ProgressBar 
+                  progress={Math.min(1, (temperature - 60) * 0.025)} 
+                  color={temperature > 80 ? '#F44336' : '#2196F3'}
+                  style={styles.indicatorBar}
+                />
+              </View>
+              <View style={styles.readingItem}>
+                <Text style={styles.readingLabel}>Humidity</Text>
+                <Text style={[styles.readingValue, { color: '#009688' }]}>{humidity}%</Text>
+                <ProgressBar 
+                  progress={Math.min(1, humidity / 100)} 
+                  color="#009688"
+                  style={styles.indicatorBar}
                 />
               </View>
             </View>
-            <View style={styles.readingItem}>
-              <Text style={styles.readingLabel}>Humidity</Text>
-              <Text style={[styles.readingValue, {color: '#009688'}]}>{humidity}%</Text>
-              <View style={[styles.indicatorBar, {backgroundColor: '#B2DFDB'}]}>
-                <View 
-                  style={[
-                    styles.indicatorFill, 
-                    {
-                      width: `${humidity}%`,
-                      backgroundColor: '#009688'
-                    }
-                  ]} 
-                />
-              </View>
-            </View>
-          </View>
 
-          {/* Dynamic messages based on sensor values */}
-          <View style={styles.messagesContainer}>
-            <Text style={styles.dynamicMessage}>{temperatureMessage}</Text>
-            <Text style={styles.dynamicMessage}>{humidityMessage}</Text>
-          </View>
-        </View>
+            {/* Dynamic messages based on sensor values */}
+            <View style={styles.messagesContainer}>
+              <Paragraph style={styles.dynamicMessage}>{temperatureMessage}</Paragraph>
+              <Paragraph style={styles.dynamicMessage}>{humidityMessage}</Paragraph>
+            </View>
+          </Card.Content>
+        </Card>
 
         {/* Card: Gas Leak */}
-        <TouchableOpacity 
-          style={[
-            styles.card, 
-            gasLeak ? styles.alertCard : {}
-          ]}
-          onPress={toggleGasLeak}
-          activeOpacity={0.9}
-        >
-          <View style={styles.cardHeader}>
-            <Text style={styles.cardTitle}>Gas Leak Status</Text>
-            {gasLeak && <View style={styles.pulsatingDot} />}
-          </View>
-          
-          <View style={styles.statusContainer}>
-            <View style={[
-              styles.statusIndicator, 
-              {backgroundColor: gasLeak ? '#FF1744' : '#00C853'}
-            ]} />
-            <Text
-              style={[
-                styles.gasLeakStatus,
-                {color: gasLeak ? '#FF1744' : '#00C853'},
-              ]}>
-              {gasLeak ? 'ALERT: GAS LEAK DETECTED!' : 'Normal - No Leaks Detected'}
-            </Text>
-          </View>
-          <Text style={styles.dynamicMessage}>{gasLeakMessage}</Text>
-          <Text style={styles.tapHint}>(Tap to toggle status for demo)</Text>
+        <TouchableOpacity onPress={toggleGasLeak} activeOpacity={0.9}>
+          <Card style={[styles.card, gasLeak ? styles.alertCard : {}]}>
+            <Card.Title 
+              title="Gas Leak Status" 
+              right={() => gasLeak && <View style={styles.pulsatingDot} />} 
+            />
+            <Card.Content>
+              <View style={styles.statusContainer}>
+                <View style={[
+                  styles.statusIndicator, 
+                  { backgroundColor: gasLeak ? '#FF1744' : '#00C853' }
+                ]} />
+                <Text 
+                  style={[
+                    styles.gasLeakStatus,
+                    { color: gasLeak ? '#FF1744' : '#00C853' }
+                  ]}>
+                  {gasLeak ? 'ALERT: GAS LEAK DETECTED!' : 'Normal - No Leaks Detected'}
+                </Text>
+              </View>
+              <Paragraph style={styles.dynamicMessage}>{gasLeakMessage}</Paragraph>
+              <Text style={styles.tapHint}>(Tap to toggle status for demo)</Text>
+            </Card.Content>
+          </Card>
         </TouchableOpacity>
 
-        {/* Card: Recommendations */}
-        <View style={styles.card}>
-          <View style={styles.cardHeader}>
-            <Text style={styles.cardTitle}>Safety Recommendations</Text>
-          </View>
-          {suggestions.map((suggestion, index) => (
-            <View key={index} style={styles.suggestionContainer}>
-              <View style={styles.bulletPoint} />
-              <Text style={styles.suggestionItem}>{suggestion}</Text>
-            </View>
-          ))}
-        </View>
-        
+        {/* Card: Safety Recommendations */}
+        <Card style={styles.card}>
+          <Card.Title title="Safety Recommendations" />
+          <Card.Content>
+            {suggestions.map((suggestion, index) => (
+              <List.Item
+                key={index}
+                title={suggestion}
+                left={() => <List.Icon icon="checkbox-blank-circle" color="#FF5722" />}
+                titleStyle={styles.suggestionItem}
+              />
+            ))}
+          </Card.Content>
+        </Card>
+
         <View style={styles.footer}>
           <Text style={styles.footerText}>Last Updated: Just Now</Text>
         </View>
       </ScrollView>
-    </View>
+    </PaperProvider>
   );
 }
 
 const styles = StyleSheet.create({
-  mainContainer: {
-    flex: 1,
-    backgroundColor: '#F5F5F5',
-  },
   headerGradient: {
     paddingTop: 40,
     paddingBottom: 20,
@@ -358,46 +350,23 @@ const styles = StyleSheet.create({
     paddingBottom: 30,
   },
   card: {
-    backgroundColor: '#FFFFFF',
     marginHorizontal: 16,
     marginTop: 16,
     borderRadius: 16,
-    padding: 20,
-    // Shadow for Android
-    elevation: 4,
-    // Shadow for iOS
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    overflow: 'hidden',
   },
   alertCard: {
     borderLeftWidth: 5,
     borderLeftColor: '#FF1744',
     backgroundColor: '#FFF8F8',
   },
-  cardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 15,
-  },
-  cardTitle: {
-    fontSize: 18,
-    color: '#424242',
-    fontWeight: 'bold',
-  },
   updateIndicator: {
     width: 8,
     height: 8,
     borderRadius: 4,
     backgroundColor: '#4CAF50',
-  },
-  pulsatingDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: '#FF1744',
+    marginRight: 16,
+    alignSelf: 'center',
   },
   readingsRow: {
     flexDirection: 'row',
@@ -420,11 +389,7 @@ const styles = StyleSheet.create({
   indicatorBar: {
     height: 6,
     borderRadius: 3,
-    width: '100%',
-  },
-  indicatorFill: {
-    height: '100%',
-    borderRadius: 3,
+    marginTop: 4,
   },
   messagesContainer: {
     marginTop: 10,
@@ -460,23 +425,9 @@ const styles = StyleSheet.create({
     marginTop: 8,
     alignSelf: 'center',
   },
-  suggestionContainer: {
-    flexDirection: 'row',
-    marginVertical: 6,
-    alignItems: 'center',
-  },
-  bulletPoint: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: '#FF5722',
-    marginRight: 8,
-    marginTop: 2,
-  },
   suggestionItem: {
     fontSize: 14,
     color: '#616161',
-    flex: 1,
     lineHeight: 20,
   },
   footer: {
@@ -487,5 +438,11 @@ const styles = StyleSheet.create({
   footerText: {
     fontSize: 12,
     color: '#9E9E9E',
+  },
+  pulsatingDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: '#FF1744',
   },
 });
