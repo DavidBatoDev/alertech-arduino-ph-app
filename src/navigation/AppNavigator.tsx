@@ -46,7 +46,7 @@ export default function AppNavigator() {
       <Stack.Screen
         name="DeviceId"
         component={DeviceIdScreen}
-        options={{title: 'Enter Device ID'}}
+        options={{title: 'Enter Device ID', headerShown: false}}
       />
       <Stack.Screen
         name="ChooseFireStation"
