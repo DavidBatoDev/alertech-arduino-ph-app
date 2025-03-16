@@ -36,7 +36,7 @@ export default function AppNavigator() {
       <Stack.Screen
         name="Welcome"
         component={WelcomeScreen}
-        options={{title: 'ALERTECH'}}
+        options={{title: 'ALERTECH', headerShown: false}}
       />
       <Stack.Screen
         name="ChooseType"
