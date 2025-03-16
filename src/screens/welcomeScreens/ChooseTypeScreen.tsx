@@ -1,42 +1,142 @@
 // src/screens/ChooseTypeScreen.tsx
+
 import React from 'react';
-import {View, Text, Button, StyleSheet} from 'react-native';
-import {NativeStackScreenProps} from '@react-navigation/native-stack';
-import {RootStackParamList} from '../../navigation/AppNavigator';
+import { View, Image, StyleSheet, ScrollView } from 'react-native';
+import { Card, Text } from 'react-native-paper';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../../navigation/AppNavigator';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'ChooseType'>;
 
-export default function ChooseTypeScreen({navigation}: Props) {
+export default function ChooseTypeScreen({ navigation }: Props) {
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Choose Type</Text>
-      <Text style={styles.subtitle}>Select your preferred option:</Text>
-
-      <View style={styles.buttonContainer}>
-        <Button
-          title="I have the alert system device"
-          onPress={() => navigation.navigate('DeviceId')}
-        />
+    <ScrollView contentContainerStyle={styles.container}>
+      <Text style={styles.header}>Choose Type</Text>
+      
+      {/* Bullet list description */}
+      <View style={styles.bulletContainer}>
+        <View style={styles.bulletRow}>
+          <Text style={styles.bulletPoint}>{'\u2022'}</Text>
+          <Text style={styles.bulletText}>I have the device - Lorem ipsum dolor sit amet, consectetur adipiscing elit.</Text>
+        </View>
+        <View style={styles.bulletRow}>
+          <Text style={styles.bulletPoint}>{'\u2022'}</Text>
+          <Text style={styles.bulletText}>I don't have the device - Lorem ipsum dolor sit amet, consectetur adipiscing elit.</Text>
+        </View>
       </View>
 
-      <View style={styles.buttonContainer}>
-        <Button
-          title="I don't have an alert system but I want to be alert"
-          onPress={() => navigation.navigate('ChooseFireStation')}
-        />
-      </View>
-    </View>
+      {/* Card 1 */}
+      <Card onPress={() => navigation.navigate('DeviceId')} style={styles.card}>
+        <View style={styles.cardContent}>
+          <Image
+            source={require('../../assets/images/device.png')}
+            style={styles.cardImage}
+          />
+          <View style={styles.cardTextContainer}>
+            <Text style={styles.cardTitle}>I have the alert system device</Text>
+            <Text style={styles.cardSubtitle}>Tap to proceed</Text>
+          </View>
+        </View>
+      </Card>
+
+      {/* Card 2 */}
+      <Card onPress={() => navigation.navigate('ChooseFireStation')} style={styles.card}>
+        <View style={styles.cardContent}>
+          <Image
+            source={require('../../assets/images/marker.png')}
+            style={styles.cardImage}
+          />
+          <View style={styles.cardTextContainer}>
+            <Text style={styles.cardTitle}>
+              I don't have an alert system but I want to be alerted
+            </Text>
+            <Text style={styles.cardSubtitle}>Tap to proceed</Text>
+          </View>
+        </View>
+      </Card>
+    </ScrollView>
   );
 }
 
+const CARD_HEIGHT = 90;
+
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    flexGrow: 1,
     padding: 16,
+    paddingTop: 80,
+    backgroundColor: '#FB4F4F',
+    alignItems: 'center',
   },
-  title: {fontSize: 24, fontWeight: 'bold', marginBottom: 16},
-  subtitle: {fontSize: 16, marginBottom: 24},
-  buttonContainer: {marginVertical: 8},
+  header: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    // color: '#333',
+    color: '#fff',
+    marginBottom: 16,
+    textAlign: 'justify',
+  },
+  bulletContainer: {
+    alignSelf: 'stretch',
+    marginBottom: 24,
+    paddingHorizontal: 20,
+  },
+  bulletRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 8,
+  },
+  bulletPoint: {
+    fontSize: 20,
+    lineHeight: 22,
+    marginRight: 8,
+    // color: '#333',
+    color: '#fff',
+  },
+  bulletText: {
+    flex: 1,
+    fontSize: 16,
+    // color: '#666',
+    color: '#fff',
+    lineHeight: 22,
+  },
+  card: {
+    width: '100%',
+    marginVertical: 8,
+    borderRadius: 12,
+    elevation: 3, // Android shadow
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    // backgroundColor: '#fff',
+    backgroundColor: '#FF7E5F',
+
+  },
+  cardContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: CARD_HEIGHT,
+    paddingHorizontal: 16,
+  },
+  cardImage: {
+    width: CARD_HEIGHT * 0.8,
+    height: CARD_HEIGHT * 0.8,
+    resizeMode: 'contain',
+  },
+  cardTextContainer: {
+    flex: 1,
+    marginLeft: 16,
+  },
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    // color: '#333',
+    color: '#fff',
+  },
+  cardSubtitle: {
+    fontSize: 14,
+    // color: '#888',
+    color: '#fff',
+    marginTop: 4,
+  },
 });

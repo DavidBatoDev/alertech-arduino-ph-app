@@ -41,7 +41,7 @@ export default function AppNavigator() {
       <Stack.Screen
         name="ChooseType"
         component={ChooseTypeScreen}
-        options={{title: 'Choose Type'}}
+        options={{title: 'Choose Type', headerBackButtonDisplayMode: 'default', headerShown: false}}
       />
       <Stack.Screen
         name="DeviceId"
@@ -51,7 +51,7 @@ export default function AppNavigator() {
       <Stack.Screen
         name="ChooseFireStation"
         component={ChooseFireStationScreen}
-        options={{title: 'Choose Fire Station'}}
+        options={{title: 'Choose Fire Station', headerShown: false}}
       />
       <Stack.Screen
         name="UserDashboard"
