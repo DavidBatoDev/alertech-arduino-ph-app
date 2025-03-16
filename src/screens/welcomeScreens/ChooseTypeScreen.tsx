@@ -109,8 +109,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 3,
     // backgroundColor: '#fff',
-    backgroundColor: '#FF7E5F',
-
+    // backgroundColor: '#FF7E5F'
+    backgroundColor: '#FF8A80'
   },
   cardContent: {
     flexDirection: 'row',

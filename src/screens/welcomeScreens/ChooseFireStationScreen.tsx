@@ -126,10 +126,17 @@ export default function ChooseFireStationScreen({ navigation }: Props) {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Choose Fire Station</Text>
-      <Text style={styles.description}>
-        • Select a fire station to proceed. {'\n'}
-        • You can change this later in the settings.
-      </Text>
+      {/* Bullet list description */}
+      <View style={styles.bulletContainer}>
+        <View style={styles.bulletRow}>
+          <Text style={styles.bulletPoint}>{'\u2022'}</Text>
+          <Text style={styles.bulletText}>Choose the nearest firestation you want to be alerted to</Text>
+        </View>
+        <View style={styles.bulletRow}>
+          <Text style={styles.bulletPoint}>{'\u2022'}</Text>
+          <Text style={styles.bulletText}>You can later change this in the settings</Text>
+        </View>
+      </View>
 
       {fireStations.map((station) => (
         <TouchableOpacity
@@ -156,7 +163,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FB4F4F',
     padding: 16,
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
+    paddingTop: 80,
+    // justifyContent: 'center',
   },
   title: {
     fontSize: 28,
@@ -166,10 +175,34 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   description: {
-    fontSize: 14,
+    fontSize: 16,
     color: 'white',
     marginBottom: 24,
     textAlign: 'left',
+  },
+  bulletContainer: {
+    alignSelf: 'stretch',
+    marginBottom: 24,
+    paddingHorizontal: 20,
+  },
+  bulletRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 8,
+  },
+  bulletPoint: {
+    fontSize: 20,
+    lineHeight: 22,
+    marginRight: 8,
+    // color: '#333',
+    color: '#fff',
+  },
+  bulletText: {
+    flex: 1,
+    fontSize: 16,
+    // color: '#666',
+    color: '#fff',
+    lineHeight: 22,
   },
   card: {
     backgroundColor: '#FF8A80',
@@ -187,6 +220,7 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     marginRight: 16,
+    objectFit: 'cover',
   },
   textContainer: {
     flex: 1,
