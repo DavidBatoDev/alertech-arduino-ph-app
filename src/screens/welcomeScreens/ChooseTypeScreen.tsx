@@ -17,11 +17,11 @@ export default function ChooseTypeScreen({ navigation }: Props) {
       <View style={styles.bulletContainer}>
         <View style={styles.bulletRow}>
           <Text style={styles.bulletPoint}>{'\u2022'}</Text>
-          <Text style={styles.bulletText}>I have the device - Lorem ipsum dolor sit amet, consectetur adipiscing elit.</Text>
+          <Text style={styles.bulletText}>I have the device - For those user who have the alertech device installed on their homes</Text>
         </View>
         <View style={styles.bulletRow}>
           <Text style={styles.bulletPoint}>{'\u2022'}</Text>
-          <Text style={styles.bulletText}>I don't have the device - Lorem ipsum dolor sit amet, consectetur adipiscing elit.</Text>
+          <Text style={styles.bulletText}>I don't have the device - For those user who does't have the alertech device but want's to be alerted in their neighborhood</Text>
         </View>
       </View>
 
@@ -78,7 +78,7 @@ const styles = StyleSheet.create({
   },
   bulletContainer: {
     alignSelf: 'stretch',
-    marginBottom: 24,
+    marginBottom: 16,
     paddingHorizontal: 20,
   },
   bulletRow: {
