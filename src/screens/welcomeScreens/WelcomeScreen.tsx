@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Image, StyleSheet } from 'react-native';
 import { Button, Text } from 'react-native-paper';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -6,11 +6,27 @@ import { RootStackParamList } from '../../navigation/AppNavigator';
 import LinearGradient from 'react-native-linear-gradient';
 import Logo from '../../assets/svgs/logo.svg'
 import LogoLight from '../../assets/svgs/logo-light.svg'
+import { useSelector } from 'react-redux';
 
 // Type Props
 type Props = NativeStackScreenProps<RootStackParamList, 'Welcome'>;
 
+
 export default function WelcomeScreen({ navigation }: Props) {
+  const { user } = useSelector((state: { user: { user: any } }) => state.user);
+
+  useEffect(() => {
+    // check first if the user is type of user or neighbor
+    if (user) {
+      if (user.type === 'user') {
+        navigation.navigate('UserDashboard', { deviceId: undefined });
+      } else if (user.type === 'neighbor') {
+        navigation.navigate('NeighborhoodDashboard', { stationId: 'sti-cubao' });
+      }
+    }
+  }, []);
+
+
   return (
     <LinearGradient
       // colors={['#FFD9DA', "#FF7E5F"]}
