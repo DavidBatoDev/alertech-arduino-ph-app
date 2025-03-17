@@ -63,7 +63,7 @@ export default function AppNavigator() {
       <Stack.Screen
         name="NeighborhoodDashboard"
         component={NeighborhoodDashboardScreen}
-        options={{title: 'Neighborhood Alert'}}
+        options={{title: 'Neighborhood Alert', headerShown: false}}
       />
       <Stack.Screen
         name="Alarm"
