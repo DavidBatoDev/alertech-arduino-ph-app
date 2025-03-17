@@ -1,19 +1,40 @@
 // src/screens/DeviceIdScreen.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation/AppNavigator';
 import { Image } from 'react-native';
+import { useSelector } from 'react-redux';
 import deviceimage from '../../assets/images/device_id.png';
+import { Alert } from 'react-native';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'DeviceId'>;
 
 export default function DeviceIdScreen({ navigation }: Props) {
+  const { user } = useSelector((state: { user: { user: any } }) => state.user);
   const [deviceId, setDeviceId] = useState('');
+  const [alert, setAlert] = useState(false);
 
   const handleNext = () => {
-    navigation.navigate('UserDashboard', { deviceId });
+    if (!deviceId.trim()) return;
+    if (deviceId == '123456') {
+      navigation.navigate('UserDashboard', { deviceId });
+    } else {
+      Alert.alert('Device ID not found', 'Please enter a valid Device ID', [{ text
+      : 'OK' }]);
+    }
   };
+
+  useEffect(() => {
+    // check first if the user is type of user or neighbor
+    if (user) {
+      if (user.type === 'user') {
+        navigation.navigate('UserDashboard', { deviceId: undefined });
+      } else if (user.type === 'neighbor') {
+        navigation.navigate('NeighborhoodDashboard', { stationId: 'sti-cubao' });
+      }
+    }
+  }, []);
 
   return (
     <View style={styles.container}>

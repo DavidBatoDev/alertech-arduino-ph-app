@@ -1,5 +1,5 @@
 // UserDashboardScreen.tsx
-import React, { useState, useEffect, JSX } from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
   StyleSheet, 
   StatusBar, 
@@ -13,6 +13,7 @@ import {
 import LinearGradient from 'react-native-linear-gradient';
 import messaging, { FirebaseMessagingTypes } from '@react-native-firebase/messaging';
 import notifee, { AndroidImportance } from '@notifee/react-native';
+import firestore from '@react-native-firebase/firestore';
 import { setupNotificationChannel } from '../utils/notificationSetup';
 import { 
   Card, 
@@ -25,6 +26,9 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
+import { useDispatch } from 'react-redux';
+import { setRegularUser } from '../redux/userSlice';  // <-- We'll use this
+import type { RegularUser } from '../redux/userTypes';
 
 // Define the props type for navigation. Ensure 'UserDashboard' is defined in RootStackParamList.
 type Props = NativeStackScreenProps<RootStackParamList, 'UserDashboard'>;
@@ -33,102 +37,73 @@ type Props = NativeStackScreenProps<RootStackParamList, 'UserDashboard'>;
 const showAlarmUI = async (message: FirebaseMessagingTypes.RemoteMessage) => {
   Vibration.vibrate([500, 1000, 500, 1000], true); // Vibrate pattern
   Alert.alert(
-    "🚨 Fire Alert!",
+    '🚨 Fire Alert!',
     message.notification?.body ?? 'No message body',
     [
       {
-        text: "Dismiss Alarm",
+        text: 'Dismiss Alarm',
         onPress: () => {
           Vibration.cancel();
         },
-        style: "cancel"
+        style: 'cancel'
       }
     ],
     { cancelable: false }
   );
 };
 
-  // // Handle foreground and background messages
-  // useEffect(() => {
-  //   requestUserPermission();
-  //   getToken();
+export default function UserDashboard({ navigation }: Props) {
+  const dispatch = useDispatch();
 
-  //   // Foreground message handler
-  //   const unsubscribe = messaging().onMessage(async remoteMessage => {
-  //     console.log('Foreground message:', remoteMessage);
-  //     Alert.alert('New Message', JSON.stringify(remoteMessage));
-  //   });
+  // Local states (if you want to display them immediately in the UI)
+  const [temperature, setTemperature] = useState<number>(0);
+  const [humidity, setHumidity] = useState<number>(0);
+  const [gasLeak, setGasLeak] = useState<boolean>(false);
+  const [status, setStatus] = useState<string>('');
 
-  //   // Background message handler (when app is killed)
-  //   messaging().setBackgroundMessageHandler(async remoteMessage => {
-  //     console.log('Background message:', remoteMessage);
-  //   });
-
-  //   // Clean up
-  //   return unsubscribe;
-  // }, []);
-
-
-export default function UserDashboard({navigation}: Props): JSX.Element {
+  // Optional: store your FCM token
   const [token, setToken] = useState<string | null>(null);
 
-  // Handle permissions and get token
-  async function requestUserPermission() {
-    const authStatus = await messaging().requestPermission();
-    const enabled =
-      authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
-      authStatus === messaging.AuthorizationStatus.PROVISIONAL;
-
-    if (enabled) {
-      console.log('Authorization status:', authStatus);
-    }
-  }
-
-  const getToken = async () => {
-    try {
-      const token = await messaging().getToken();
-      setToken(token);
-      console.log('FCM Token:', token);
-    } catch (error) {
-      console.log('Error getting token:', error);
-    }
-  };
-
+  // 1. Request notification permissions & subscribe to "all" topic
   useEffect(() => {
-    messaging()
-      .subscribeToTopic('all')
-      .then(() => console.log('Subscribed to topic "all"'));
+    (async () => {
+      const authStatus = await messaging().requestPermission();
+      const enabled =
+        authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+        authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+      if (enabled) {
+        console.log('Notification permission granted:', authStatus);
+      }
+
+      const fetchedToken = await messaging().getToken();
+      setToken(fetchedToken);
+      console.log('FCM Token:', fetchedToken);
+    })();
+
+    // Subscribe to topic 'all' for FCM
+    messaging().subscribeToTopic('alertech-arduino-day-demo').then(() => {
+      console.log('Subscribed to topic: all');
+    });
+
+    // Listen for foreground messages
+    const unsubscribe = messaging().onMessage(async remoteMessage => {
+      console.log('Received FCM message:', remoteMessage);
+      if (remoteMessage.data && remoteMessage.data.type === 'alarm') {
+        navigation.navigate('Alarm');
+      }
+    });
+    return unsubscribe;
   }, []);
 
+
+  // 2. Handle incoming messages in the foreground
   useEffect(() => {
     const unsubscribe = messaging().onMessage(async (remoteMessage) => {
       console.log('Foreground notification:', remoteMessage);
-      
-      /////////////////////////// Show a regular notification /////////////////////////// 
-      // if (remoteMessage?.data?.type === 'alarm') {
-      //   // Trigger an alarm UI
-      //   showAlarmUI(remoteMessage);
-      // } else {
-      //   // Show a regular notification
-      //   await notifee.displayNotification({
-      //     title: remoteMessage.notification?.title ?? 'No Title',
-      //     body: remoteMessage.notification?.body ?? 'No Body',
-      //     android: {
-      //       channelId: 'alarm_channel',
-      //       sound: 'alarm_sound',
-      //       importance: AndroidImportance.HIGH,
-      //     },
-      //   });
-      // }
 
-      await getToken();
-
-      ///////////////////////////  Show full-screen notification /////////////////////////// 
       if (remoteMessage?.data?.type === 'alarm') {
-        // When the app is open, show the custom alarm UI
         showAlarmUI(remoteMessage);
       } else {
-        // For other types of messages, show a regular notification
         await notifee.displayNotification({
           title: remoteMessage.notification?.title ?? 'No Title',
           body: remoteMessage.notification?.body ?? 'No Body',
@@ -141,55 +116,70 @@ export default function UserDashboard({navigation}: Props): JSX.Element {
       }
     });
 
-    setupNotificationChannel();
-  
-    return unsubscribe;
+    return unsubscribe; // Cleanup on unmount
   }, []);
 
-  // State for sensor data
-  const [temperature, setTemperature] = useState(11.8);
-  const [humidity, setHumidity] = useState(63);
-  const [gasLeak, setGasLeak] = useState(false);
-  
-  // Animated value for temperature
-  const animatedTemp = new Animated.Value(0);
-  const tempOpacity = new Animated.Value(1);
-  
-  // Function to generate random temperature changes
-  const updateTemperature = () => {
-    // Random value between -1.0 and 1.0
-    const randomChange = (Math.random() * 2 - 1).toFixed(1);
-    const newTemp = parseFloat((temperature + parseFloat(randomChange)).toFixed(1));
-    
-    // Keep temperature in a reasonable range (75-87)
-    const boundedTemp = Math.min(Math.max(newTemp, 75), 87);
-    
-    // Animate temperature change
-    tempOpacity.setValue(0.3);
-    Animated.timing(tempOpacity, {
-      toValue: 1,
-      duration: 500,
-      useNativeDriver: true,
-    }).start();
-    
-    setTemperature(boundedTemp);
-  };
-  
-  // Update temperature every 3 seconds
+  // 3. Listen to Firestore document in real time
   useEffect(() => {
-    const interval = setInterval(updateTemperature, 3000);
-    return () => clearInterval(interval);
-  }, [temperature]);
-  
-  // Generate dynamic messages based on sensor values
+    // Replace with your actual doc ID or pass via route params
+    const docRef = firestore().collection('user').doc('alertech-arduino-day-demo');
+
+    // onSnapshot for real-time updates
+    const unsubscribe = docRef.onSnapshot(
+      (docSnap) => {
+        if (docSnap.exists) {
+          const raw = docSnap.data();
+
+          // Build a RegularUser object
+          if (raw) {
+            const userData: RegularUser = {
+              id: docSnap.id,
+              username: raw.username ?? '',
+              address: raw.address,
+              contactNumber: raw.contactNumber,
+              fireStationUUID: raw.fireStationUUID,
+              gasLeak: raw.gasLeak,
+              humidity: raw.humidity,
+              status: raw.status,
+              temperature: raw.temperature,
+              validation: raw.validation,
+              type: 'user',
+            };
+
+            // Dispatch to Redux
+            dispatch(setRegularUser(userData));
+
+            // Update local state for immediate UI
+            setTemperature(raw.temperature ?? 0);
+            setHumidity(raw.humidity ?? 0);
+            setGasLeak(raw.gasLeak ?? false);
+            setStatus(raw.status ?? '');
+          } else {
+            console.log('No such document!');
+          }
+
+        } else {
+          console.log('No such document!');
+        }
+      },
+      (error) => {
+        console.error('Error with onSnapshot:', error);
+      }
+    );
+
+    // Cleanup
+    return () => unsubscribe();
+  }, [dispatch]);
+
+  // Dynamic messages based on sensor values
   const temperatureMessage =
-    temperature > 80
+    temperature > 27
       ? 'Temperature is high! Consider turning on air conditioning.'
-      : temperature < 77
+      : temperature < 25
       ? 'Temperature is getting cooler.'
       : 'Temperature is comfortable.';
 
-  const humidityMessage = 
+  const humidityMessage =
     humidity > 60
       ? 'Humidity is high. Consider using a dehumidifier.'
       : humidity < 30
@@ -200,6 +190,11 @@ export default function UserDashboard({navigation}: Props): JSX.Element {
     ? 'Gas leak detected! Turn off the gas valve and ventilate immediately.'
     : 'No gas leak detected. Environment is safe.';
 
+  // (Optional) Toggling gas leak for demo only
+  const toggleGasLeak = () => {
+    setGasLeak(!gasLeak);
+  };
+
   // Additional suggestions
   const suggestions = [
     'Check ventilation regularly.',
@@ -208,11 +203,6 @@ export default function UserDashboard({navigation}: Props): JSX.Element {
     'Have an evacuation plan ready.',
     'Store flammable materials safely.'
   ];
-  
-  // Function to toggle gas leak status (for demo purposes)
-  const toggleGasLeak = () => {
-    setGasLeak(!gasLeak);
-  };
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -224,7 +214,7 @@ export default function UserDashboard({navigation}: Props): JSX.Element {
         <Card.Content style={styles.headerContainer}>
           <Title style={styles.headerTitle}>Smart Fire & Gas Leak Alert System</Title>
           <Text style={styles.headerSubtitle}>Arduino PH</Text>
-          <Text style={{ color: '#FFEB3B' }}>{token}</Text>
+          {/* <Text style={{ color: '#FFEB3B' }}>{token}</Text> */}
         </Card.Content>
       </LinearGradient>
 
@@ -239,26 +229,24 @@ export default function UserDashboard({navigation}: Props): JSX.Element {
             <View style={styles.readingsRow}>
               <View style={styles.readingItem}>
                 <Text style={styles.readingLabel}>Temperature</Text>
-                <Animated.Text 
-                  style={[
-                    styles.readingValue, 
-                    { 
-                      opacity: tempOpacity,
-                      color: temperature > 80 ? '#FF5722' : '#1976D2'
-                    }
-                  ]}>
-                  {temperature.toFixed(1)}°F
-                </Animated.Text>
-                {/* Using ProgressBar for indicator */}
+                <Text 
+                style={[
+                  styles.readingValue,
+                  { color: temperature > 27 ? '#FF5722' : '#1976D2' }
+                ]}>
+                {temperature?.toFixed(1)}°C
+                </Text>
                 <ProgressBar 
-                  progress={Math.min(1, (temperature - 60) * 0.025)} 
-                  color={temperature > 80 ? '#F44336' : '#2196F3'}
+                  progress={Math.min(1, (temperature - 20) * 0.05)} 
+                  color={temperature > 27 ? '#F44336' : '#2196F3'}
                   style={styles.indicatorBar}
                 />
               </View>
               <View style={styles.readingItem}>
                 <Text style={styles.readingLabel}>Humidity</Text>
-                <Text style={[styles.readingValue, { color: '#009688' }]}>{humidity}%</Text>
+                <Text style={[styles.readingValue, { color: '#009688' }]}>
+                  {humidity}%
+                </Text>
                 <ProgressBar 
                   progress={Math.min(1, humidity / 100)} 
                   color="#009688"
@@ -267,7 +255,6 @@ export default function UserDashboard({navigation}: Props): JSX.Element {
               </View>
             </View>
 
-            {/* Dynamic messages based on sensor values */}
             <View style={styles.messagesContainer}>
               <Paragraph style={styles.dynamicMessage}>{temperatureMessage}</Paragraph>
               <Paragraph style={styles.dynamicMessage}>{humidityMessage}</Paragraph>

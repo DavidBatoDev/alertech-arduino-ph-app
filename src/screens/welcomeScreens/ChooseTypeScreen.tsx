@@ -1,14 +1,28 @@
 // src/screens/ChooseTypeScreen.tsx
 
-import React from 'react';
+import React, {useEffect} from 'react';
 import { View, Image, StyleSheet, ScrollView } from 'react-native';
 import { Card, Text } from 'react-native-paper';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation/AppNavigator';
+import { useSelector } from 'react-redux';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'ChooseType'>;
 
 export default function ChooseTypeScreen({ navigation }: Props) {
+  const { user } = useSelector((state: { user: { user: any } }) => state.user);
+
+  useEffect(() => {
+    // check first if the user is type of user or neighbor
+    if (user) {
+      if (user.type === 'user') {
+        navigation.navigate('UserDashboard', { deviceId: undefined });
+      } else if (user.type === 'neighbor') {
+        navigation.navigate('NeighborhoodDashboard', { stationId: 'sti-cubao' });
+      }
+    }
+  }, []);
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.header}>Choose Type</Text>

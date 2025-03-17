@@ -58,7 +58,7 @@ export default function AppNavigator() {
       <Stack.Screen
         name="UserDashboard"
         component={UserDashboardScreen}
-        options={{title: 'Fire & Gas Alert'}}
+        options={{title: 'Fire & Gas Alert', headerShown: false}}
       />
       <Stack.Screen
         name="NeighborhoodDashboard"
