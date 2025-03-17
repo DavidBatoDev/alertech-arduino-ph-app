@@ -1,5 +1,4 @@
-
-// send notification to a specific device using FCM v1
+// send notification to all devices subscribed to the "all" topic using FCM v1
 const admin = require('firebase-admin');
 const serviceAccount = require('./serviceAccountKey.json');
 
@@ -7,13 +6,12 @@ admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
 
-const FCM_TOKEN = "cKzXDOmJSd-xbeb_3GZkbQ:APA91bFrxZWjwD0uahsmjpg9jDJKUgQxCVzevuzSRMQM6j9tlMQ2Wzev325J_E_rXHMOY5pVJJt9AS8lKzP4ThETl03FWhWZz8AjRmYnUJxi4WlfUSpB5aA"
-
+// Send notification to the "all" topic
 const message = {
-  token: FCM_TOKEN,
+  topic: 'all', // This targets all devices subscribed to "all"
   notification: {
-    title: 'Test Alarm',
-    body: 'This is a test alarm via FCM v1'
+    title: 'Fire Detected',
+    body: 'Fire Detected in PUP Sta. Mesa Room 101'
   },
   data: {
     type: 'alarm'

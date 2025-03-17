@@ -119,8 +119,8 @@ export default function ChooseFireStationScreen({ navigation }: Props) {
   };
 
   const fireStations = [
-    { id: 'station1', name: 'Pureza FireStation', image: require('../../assets/images/firestation.png') },
-    { id: 'station2', name: 'STI Cubao', image: require('../../assets/images/sti_logo.png') },
+    { id: 'station1', name: 'STI Cubao (Arduino PH)', image: require('../../assets/images/sti_logo.png') },
+    { id: 'station2', name: 'Pureza FireStation', image: require('../../assets/images/firestation.png') },
   ];
 
   return (

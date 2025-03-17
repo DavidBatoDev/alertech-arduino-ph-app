@@ -1,16 +1,33 @@
 // src/screens/NeighborhoodDashboardScreen.tsx
-import React from 'react';
-import {View, Text, StyleSheet} from 'react-native';
-import {NativeStackScreenProps} from '@react-navigation/native-stack';
-import {RootStackParamList} from '../navigation/AppNavigator';
+import React, { useEffect } from 'react';
+import { View, Text, StyleSheet } from 'react-native';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../navigation/AppNavigator';
+import messaging from '@react-native-firebase/messaging';
+import { useNavigation } from '@react-navigation/native';
 
-type Props = NativeStackScreenProps<
-  RootStackParamList,
-  'NeighborhoodDashboard'
->;
+type Props = NativeStackScreenProps<RootStackParamList, 'NeighborhoodDashboard'>;
 
-export default function NeighborhoodDashboardScreen({route}: Props) {
-  const {stationId} = route.params || {};
+export default function NeighborhoodDashboardScreen({ route, navigation }: Props) {
+  const { stationId } = route.params || {};
+
+  useEffect(() => {
+    // Subscribe to the "all" topic to receive broadcast notifications
+    messaging()
+      .subscribeToTopic('all')
+      .then(() => console.log('Subscribed to topic: all'));
+
+    // Listen for foreground messages
+    const unsubscribe = messaging().onMessage(async remoteMessage => {
+      console.log('Received FCM message:', remoteMessage);
+      if (remoteMessage.data && remoteMessage.data.type === 'alarm') {
+        // Navigate to the Alarm screen (assumes you've defined a screen named "Alarm")
+        navigation.navigate('Alarm');
+      }
+    });
+
+    return unsubscribe;
+  }, [navigation]);
 
   return (
     <View style={styles.container}>
@@ -29,6 +46,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 16,
   },
-  title: {fontSize: 24, fontWeight: 'bold', marginBottom: 8},
-  info: {fontSize: 16, textAlign: 'center'},
+  title: { fontSize: 24, fontWeight: 'bold', marginBottom: 8 },
+  info: { fontSize: 16, textAlign: 'center' },
 });

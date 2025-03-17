@@ -10,6 +10,7 @@ import DeviceIdScreen from '../screens/welcomeScreens/DeviceIdScreen';
 import ChooseFireStationScreen from '../screens/welcomeScreens/ChooseFireStationScreen';
 import UserDashboardScreen from '../screens/UserDashboardScreen';
 import NeighborhoodDashboardScreen from '../screens/NeighborhoodDashboardScreen';
+import AlarmScreen from '../screens/AlarmScreen';
 
 // Define route names & params
 export type RootStackParamList = {
@@ -21,6 +22,7 @@ export type RootStackParamList = {
   ChooseFireStation: undefined;
   UserDashboard: {deviceId?: string}; // Optional param
   NeighborhoodDashboard: {stationId?: string}; // Optional param
+  Alarm: undefined; // New Alarm route
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -62,6 +64,11 @@ export default function AppNavigator() {
         name="NeighborhoodDashboard"
         component={NeighborhoodDashboardScreen}
         options={{title: 'Neighborhood Alert'}}
+      />
+      <Stack.Screen
+        name="Alarm"
+        component={AlarmScreen}
+        options={{title: 'Alarm', headerShown: false}}
       />
     </Stack.Navigator>
   );
