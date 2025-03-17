@@ -1,20 +1,8 @@
 // userSlice.ts
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import type { User, RegularUser, NeighborUser } from './userTypes'; // Adjust import path
 
-interface User {
-  id: string;
-  username: string;
-  email?: string;
-  type?: 'user' | 'neighbor';     // <--- ADDED
-  // Neighbor-specific fields:
-  address?: string;
-  contact?: string;
-  description?: string;
-  fireStationUUID?: string;
-}
-
-// Define the initial state type
 interface UserState {
   user: User | null;
   isAuthenticated: boolean;
@@ -33,11 +21,19 @@ const userSlice = createSlice({
   name: 'user',
   initialState,
   reducers: {
-    login: (state, action: PayloadAction<User>) => {
-      state.user = action.payload;
+    // For regular user
+    setRegularUser: (state, action: PayloadAction<RegularUser>) => {
+      state.user = action.payload;           // user is now a RegularUser
       state.isAuthenticated = true;
       state.error = null;
     },
+    // For neighbor user
+    setNeighborUser: (state, action: PayloadAction<NeighborUser>) => {
+      state.user = action.payload;           // user is now a NeighborUser
+      state.isAuthenticated = true;
+      state.error = null;
+    },
+
     logout: (state) => {
       state.user = null;
       state.isAuthenticated = false;
@@ -48,33 +44,15 @@ const userSlice = createSlice({
     setError: (state, action: PayloadAction<string>) => {
       state.error = action.payload;
     },
-
-    // 1) Add a reducer to store neighbor data
-    setNeighborData: (state, action: PayloadAction<Partial<User>>) => {
-      // If there's no user yet, create a placeholder
-      if (!state.user) {
-        state.user = {
-          id: '',
-          username: '',
-          type: 'neighbor',
-        };
-      }
-      // Merge neighbor fields and ensure type is 'neighbor'
-      state.user = {
-        ...state.user,
-        ...action.payload,
-        type: 'neighbor',
-      };
-    },
   },
 });
 
 export const {
-  login,
+  setRegularUser,
+  setNeighborUser,
   logout,
   setLoading,
   setError,
-  setNeighborData, // <--- Export your new action
 } = userSlice.actions;
 
 export default userSlice.reducer;
