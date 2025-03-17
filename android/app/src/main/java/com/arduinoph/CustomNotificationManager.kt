@@ -17,7 +17,14 @@ object CustomNotificationManager {
     private const val CHANNEL_ID = "custom_notification_channel"
     private const val NOTIFICATION_ID = 101
 
-    fun showCustomNotification(context: Context) {
+    /**
+     * Displays a custom notification with a dynamic title and message.
+     *
+     * @param context The context to use.
+     * @param title   The title for the notification.
+     * @param message The description/message for the notification.
+     */
+    fun showCustomNotification(context: Context, title: String, message: String) {
         // Create a URI for the custom sound from the raw resource folder.
         val soundUri: Uri = Uri.parse("android.resource://${context.packageName}/${R.raw.alarm_sound}")
 
@@ -44,16 +51,17 @@ object CustomNotificationManager {
         val collapsedView = RemoteViews(context.packageName, R.layout.custom_notification_collapsed)
         val expandedView = RemoteViews(context.packageName, R.layout.custom_notification_expanded)
 
-        // Set dynamic text if needed.
-        collapsedView.setTextViewText(R.id.notification_title, "Fire Alarm Activated")
-        collapsedView.setTextViewText(R.id.notification_text, "Tap to view details.")
+        // Set the dynamic text for the collapsed layout.
+        collapsedView.setTextViewText(R.id.notification_title, title)
+        collapsedView.setTextViewText(R.id.notification_text, message)
 
-        expandedView.setTextViewText(R.id.notification_title_big, "Alarm Activated (BIG)")
-        expandedView.setTextViewText(R.id.notification_text_big, "Swipe down to see more info...")
+        // Set the dynamic text for the expanded layout.
+        expandedView.setTextViewText(R.id.notification_title_big, title)
+        expandedView.setTextViewText(R.id.notification_text_big, message)
 
         // 3. Create a PendingIntent to open MainActivity.
         val intent = Intent(context, MainActivity::class.java).apply {
-            putExtra("screen", "Alarm") // Pass parameter to navigate to a specific screen.
+            putExtra("screen", "Alarm") // Optionally pass a parameter.
             flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
         }
         val pendingIntent = PendingIntent.getActivity(
@@ -68,11 +76,11 @@ object CustomNotificationManager {
             .setSmallIcon(R.mipmap.ic_launcher)  // Required small icon.
             .setAutoCancel(true)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setContentIntent(pendingIntent)      // Open your app when tapped.
-            .setSound(soundUri)                   // Set custom sound for pre-Oreo devices.
+            .setContentIntent(pendingIntent)
+            .setSound(soundUri)  // For pre-Oreo devices.
             .setStyle(NotificationCompat.DecoratedCustomViewStyle())
-            .setCustomContentView(collapsedView)    // Collapsed layout.
-            .setCustomBigContentView(expandedView)  // Expanded layout.
+            .setCustomContentView(collapsedView)
+            .setCustomBigContentView(expandedView)
             .build()
 
         // 5. Show the notification.

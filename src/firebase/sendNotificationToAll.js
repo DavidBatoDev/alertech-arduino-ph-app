@@ -1,4 +1,3 @@
-// send notification to all devices subscribed to the "all" topic using FCM v1
 const admin = require('firebase-admin');
 const serviceAccount = require('./serviceAccountKey.json');
 
@@ -6,21 +5,17 @@ admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
 
-// Send notification to the "all" topic
+// Send a data-only notification to the "all" topic
 const message = {
-  topic: 'all', // This targets all devices subscribed to "all"
-  notification: {
-    title: 'Fire Detected',
-    body: 'Fire Detected in PUP Sta. Mesa Room 101'
-  },
+  topic: 'all',
   data: {
-    type: 'alarm'
+    type: 'alarm',         // Your service will check for this value.
+    title: 'Fire Detecteddasdasdsad',
+    body: 'Fire Detected in PUP Sta. Mesa Room 101'
+    // Optionally, add more custom fields as needed.
   },
   android: {
-    notification: {
-      channel_id: 'alarm_channel',
-      sound: 'alarm_sound'
-    }
+    priority: 'high'
   }
 };
 
