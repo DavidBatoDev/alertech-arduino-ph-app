@@ -32,5 +32,4 @@
         android:text="This is a custom notification"
         android:textColor="@android:color/black"
         android:textSize="14sp" />
-
 </RelativeLayout>

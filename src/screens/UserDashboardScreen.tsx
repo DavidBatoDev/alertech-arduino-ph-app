@@ -27,8 +27,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { useDispatch } from 'react-redux';
-import { setRegularUser } from '../redux/userSlice';  // <-- We'll use this
+import { logout, setRegularUser } from '../redux/userSlice';  // <-- We'll use this
 import type { RegularUser } from '../redux/userTypes';
+
 
 // Define the props type for navigation. Ensure 'UserDashboard' is defined in RootStackParamList.
 type Props = NativeStackScreenProps<RootStackParamList, 'UserDashboard'>;
@@ -171,6 +172,18 @@ export default function UserDashboard({ navigation }: Props) {
     return () => unsubscribe();
   }, [dispatch]);
 
+  // 4. Handle logout
+  const handleLogout = async () => {
+    try {
+      await messaging().unsubscribeFromTopic('alertech-arduino-day-demo');
+      console.log('Unsubscribed from topic: all');
+    } catch (error) {
+      console.error('Error unsubscribing from topic:', error);
+    }
+    dispatch(logout());
+    navigation.navigate('Welcome');
+  };
+
   // Dynamic messages based on sensor values
   const temperatureMessage =
     temperature > 27
@@ -219,6 +232,9 @@ export default function UserDashboard({ navigation }: Props) {
       </LinearGradient>
 
       <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
+      <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
+          <Text style={styles.logoutButtonText}>Logout</Text>
+        </TouchableOpacity>
         {/* Card: Temperature & Humidity */}
         <Card style={styles.card}>
           <Card.Title 
@@ -437,5 +453,17 @@ const styles = StyleSheet.create({
     height: 12,
     borderRadius: 6,
     backgroundColor: '#FF1744',
+  },
+  logoutButton: {
+    backgroundColor: '#D32F2F',
+    padding: 10,
+    borderRadius: 5,
+    alignItems: 'center',
+    margin: 16,
+  },
+  logoutButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
