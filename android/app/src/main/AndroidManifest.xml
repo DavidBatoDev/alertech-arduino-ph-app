@@ -14,6 +14,14 @@
       android:theme="@style/AppTheme"
       android:supportsRtl="true">
 
+      <service
+          android:name=".MyFirebaseMessagingService"
+          android:exported="false">
+          <intent-filter>
+              <action android:name="com.google.firebase.MESSAGING_EVENT" />
+          </intent-filter>
+      </service>
+
       
       <activity
         android:name=".MainActivity"
@@ -26,16 +34,14 @@
             <action android:name="android.intent.action.MAIN" />
             <category android:name="android.intent.category.LAUNCHER" />
         </intent-filter>
-      </activity>
 
-    <activity
-        android:name=".AlarmActivity"
-        android:exported="true"
-        android:showWhenLocked="true"
-        android:turnScreenOn="true"
-        android:launchMode="singleTask"
-        android:theme="@style/FullScreenAlarmTheme">
-    </activity>
+        <intent-filter>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.DEFAULT" />
+            <category android:name="android.intent.category.BROWSABLE" />
+            <data android:scheme="myapp" android:host="alarm" />
+        </intent-filter>
+      </activity>
 
 
     </application>

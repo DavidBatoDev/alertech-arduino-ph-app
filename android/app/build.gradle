@@ -117,4 +117,10 @@ dependencies {
     } else {
         implementation jscFlavor
     }
+
+    // 1. Add the Firebase BoM (this ensures consistent versions for all Firebase libs)
+    implementation platform("com.google.firebase:firebase-bom:33.9.0")
+
+    // 2. Add the Firebase Messaging library
+    implementation "com.google.firebase:firebase-messaging"
 }
