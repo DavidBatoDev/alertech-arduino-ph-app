@@ -5,7 +5,6 @@ import {
   StatusBar, 
   ScrollView, 
   TouchableOpacity,
-  Animated,
   Alert,
   Vibration,
   View
@@ -14,22 +13,13 @@ import LinearGradient from 'react-native-linear-gradient';
 import messaging, { FirebaseMessagingTypes } from '@react-native-firebase/messaging';
 import notifee, { AndroidImportance } from '@notifee/react-native';
 import firestore from '@react-native-firebase/firestore';
-import { setupNotificationChannel } from '../utils/notificationSetup';
-import { 
-  Card, 
-  Title, 
-  Paragraph, 
-  Text, 
-  ProgressBar, 
-  List 
-} from 'react-native-paper';
+import { Card, Title, Paragraph, Text, ProgressBar, List } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { useDispatch } from 'react-redux';
-import { logout, setRegularUser } from '../redux/userSlice';  // <-- We'll use this
+import { logout, setRegularUser } from '../redux/userSlice';
 import type { RegularUser } from '../redux/userTypes';
-
 
 // Define the props type for navigation. Ensure 'UserDashboard' is defined in RootStackParamList.
 type Props = NativeStackScreenProps<RootStackParamList, 'UserDashboard'>;
@@ -56,16 +46,17 @@ const showAlarmUI = async (message: FirebaseMessagingTypes.RemoteMessage) => {
 export default function UserDashboard({ navigation }: Props) {
   const dispatch = useDispatch();
 
-  // Local states (if you want to display them immediately in the UI)
+  // Local states for sensor values
   const [temperature, setTemperature] = useState<number>(0);
   const [humidity, setHumidity] = useState<number>(0);
+  const [mq2, setMq2] = useState<number>(0);
   const [gasLeak, setGasLeak] = useState<boolean>(false);
   const [status, setStatus] = useState<string>('');
-
+  
   // Optional: store your FCM token
   const [token, setToken] = useState<string | null>(null);
 
-  // 1. Request notification permissions & subscribe to "all" topic
+  // 1. Request notification permissions & subscribe to "alertech-arduino-day-demo" topic
   useEffect(() => {
     (async () => {
       const authStatus = await messaging().requestPermission();
@@ -81,12 +72,12 @@ export default function UserDashboard({ navigation }: Props) {
       console.log('FCM Token:', fetchedToken);
     })();
 
-    // Subscribe to topic 'all' for FCM
+    // Subscribe to topic 'alertech-arduino-day-demo' for FCM
     messaging().subscribeToTopic('alertech-arduino-day-demo').then(() => {
-      console.log('Subscribed to topic: all');
+      console.log('Subscribed to topic: alertech-arduino-day-demo');
     });
 
-    // Listen for foreground messages
+    // Listen for foreground messages (for navigation purposes)
     const unsubscribe = messaging().onMessage(async remoteMessage => {
       console.log('Received FCM message:', remoteMessage);
       if (remoteMessage.data && remoteMessage.data.type === 'alarm') {
@@ -94,14 +85,12 @@ export default function UserDashboard({ navigation }: Props) {
       }
     });
     return unsubscribe;
-  }, []);
+  }, [navigation]);
 
-
-  // 2. Handle incoming messages in the foreground
+  // 2. Handle incoming messages in the foreground for notifications
   useEffect(() => {
     const unsubscribe = messaging().onMessage(async (remoteMessage) => {
       console.log('Foreground notification:', remoteMessage);
-
       if (remoteMessage?.data?.type === 'alarm') {
         showAlarmUI(remoteMessage);
       } else {
@@ -116,22 +105,17 @@ export default function UserDashboard({ navigation }: Props) {
         });
       }
     });
-
     return unsubscribe; // Cleanup on unmount
   }, []);
 
-  // 3. Listen to Firestore document in real time
+  // 3. Listen to Firestore document in real time and update local state (including mq2)
   useEffect(() => {
     // Replace with your actual doc ID or pass via route params
     const docRef = firestore().collection('user').doc('alertech-arduino-day-demo');
-
-    // onSnapshot for real-time updates
     const unsubscribe = docRef.onSnapshot(
       (docSnap) => {
         if (docSnap.exists) {
           const raw = docSnap.data();
-
-          // Build a RegularUser object
           if (raw) {
             const userData: RegularUser = {
               id: docSnap.id,
@@ -141,24 +125,21 @@ export default function UserDashboard({ navigation }: Props) {
               fireStationUUID: raw.fireStationUUID,
               gasLeak: raw.gasLeak,
               humidity: raw.humidity,
+              mq2: raw.mq2, // Include mq2 in the user object
               status: raw.status,
               temperature: raw.temperature,
               validation: raw.validation,
               type: 'user',
             };
-
-            // Dispatch to Redux
             dispatch(setRegularUser(userData));
-
-            // Update local state for immediate UI
             setTemperature(raw.temperature ?? 0);
             setHumidity(raw.humidity ?? 0);
+            setMq2(raw.mq2 ?? 0);
             setGasLeak(raw.gasLeak ?? false);
             setStatus(raw.status ?? '');
           } else {
-            console.log('No such document!');
+            console.log('No data in document!');
           }
-
         } else {
           console.log('No such document!');
         }
@@ -167,8 +148,6 @@ export default function UserDashboard({ navigation }: Props) {
         console.error('Error with onSnapshot:', error);
       }
     );
-
-    // Cleanup
     return () => unsubscribe();
   }, [dispatch]);
 
@@ -176,7 +155,7 @@ export default function UserDashboard({ navigation }: Props) {
   const handleLogout = async () => {
     try {
       await messaging().unsubscribeFromTopic('alertech-arduino-day-demo');
-      console.log('Unsubscribed from topic: all');
+      console.log('Unsubscribed from topic: alertech-arduino-day-demo');
     } catch (error) {
       console.error('Error unsubscribing from topic:', error);
     }
@@ -198,6 +177,11 @@ export default function UserDashboard({ navigation }: Props) {
       : humidity < 30
       ? 'Humidity is low. Consider using a humidifier.'
       : 'Humidity level is optimal.';
+
+  const mq2Message =
+    mq2 > 500
+      ? 'High gas/smoke levels detected! Please check the sensors.'
+      : 'Gas/smoke levels are normal.';
 
   const gasLeakMessage = gasLeak
     ? 'Gas leak detected! Turn off the gas valve and ventilate immediately.'
@@ -232,10 +216,10 @@ export default function UserDashboard({ navigation }: Props) {
       </LinearGradient>
 
       <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-      <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
+        <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
           <Text style={styles.logoutButtonText}>Logout</Text>
         </TouchableOpacity>
-        {/* Card: Temperature & Humidity */}
+        {/* Card: Temperature, Humidity & MQ2 Readings */}
         <Card style={styles.card}>
           <Card.Title 
             title="Current Readings" 
@@ -246,11 +230,11 @@ export default function UserDashboard({ navigation }: Props) {
               <View style={styles.readingItem}>
                 <Text style={styles.readingLabel}>Temperature</Text>
                 <Text 
-                style={[
-                  styles.readingValue,
-                  { color: temperature > 27 ? '#FF5722' : '#1976D2' }
-                ]}>
-                {temperature?.toFixed(1)}°C
+                  style={[
+                    styles.readingValue,
+                    { color: temperature > 27 ? '#FF5722' : '#1976D2' }
+                  ]}>
+                  {temperature.toFixed(1)}°C
                 </Text>
                 <ProgressBar 
                   progress={Math.min(1, (temperature - 20) * 0.05)} 
@@ -270,7 +254,19 @@ export default function UserDashboard({ navigation }: Props) {
                 />
               </View>
             </View>
-
+            {/* New row for MQ2 sensor reading */}
+            <View style={styles.mq2Row}>
+              <Text style={styles.readingLabel}>MQ2 Sensor</Text>
+              <Text style={[styles.readingValue, { color: mq2 > 500 ? '#FF5722' : '#1976D2' }]}>
+                {mq2}
+              </Text>
+              <ProgressBar 
+                progress={Math.min(1, mq2 / 1024)} 
+                color={mq2 > 500 ? '#F44336' : '#2196F3'}
+                style={styles.indicatorBar}
+              />
+              <Paragraph style={styles.dynamicMessage}>{mq2Message}</Paragraph>
+            </View>
             <View style={styles.messagesContainer}>
               <Paragraph style={styles.dynamicMessage}>{temperatureMessage}</Paragraph>
               <Paragraph style={styles.dynamicMessage}>{humidityMessage}</Paragraph>
@@ -291,8 +287,7 @@ export default function UserDashboard({ navigation }: Props) {
                   styles.statusIndicator, 
                   { backgroundColor: gasLeak ? '#FF1744' : '#00C853' }
                 ]} />
-                <Text 
-                  style={[
+                <Text style={[
                     styles.gasLeakStatus,
                     { color: gasLeak ? '#FF1744' : '#00C853' }
                   ]}>
@@ -384,6 +379,9 @@ const styles = StyleSheet.create({
   },
   readingItem: {
     width: '45%',
+  },
+  mq2Row: {
+    marginTop: 10,
   },
   readingLabel: {
     fontSize: 14,

@@ -18,6 +18,7 @@ export interface RegularUser extends BaseUser {
   fireStationUUID?: string;
   gasLeak?: boolean;
   humidity?: number;
+  mq2?: number;
   status?: string;
   temperature?: number;
   validation?: number;
