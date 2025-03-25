@@ -1,97 +1,127 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# Alertech App
 
-# Getting Started
+## Overview
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+Alertech is an integrated fire detection and alert system composed of a mobile app, a website, and an IoT device. It enables real-time monitoring of temperature, humidity, and smoke levels, and provides instant alerts to users and fire authorities in case of a fire.
 
-## Step 1: Start Metro
+---
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+## Research Motivation
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+### Smart Fire & Gas Leak Alert System (Using ESP32 & Firebase)
 
-```sh
-# Using npm
-npm start
+This project focuses on real-time fire and gas leak detection using ESP32 and Firebase. By integrating IoT sensors, a mobile app, and a web dashboard, we ensure instant alerts to users and fire stations, even triggering an automated call if necessary.
 
-# OR using Yarn
-yarn start
-```
+#### Empowering Women with Technology
 
-## Step 2: Build and run your app
+- **Protecting Mothers & Families**: Many mothers worry about home safety while taking care of their children. This system allows them to focus on what matters, knowing they’ll be alerted if danger arises.
+- **Helping Independent Women**: For women living alone, home safety is a real concern. This system ensures they have a reliable, automated backup in case of fire or gas leaks.
+- **Supporting Women with Disabilities & Elderly Women**: Those who may struggle to react quickly in an emergency will benefit from automated alerts and fire station intervention.
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+#### Bayanihan (Neighbor Alert System)
 
-### Android
+- **Community Support**: Neighbors are alerted when a nearby device detects a fire or gas leak, encouraging immediate local assistance before emergency services arrive.
+- **Shared Safety Network**: Users without personal IoT devices can still benefit from the system by receiving alerts when their neighbors’ devices detect danger.
+- **Strengthening Community Bonds**: Promotes a culture of communal responsibility, where everyone contributes to neighborhood safety.
 
-```sh
-# Using npm
-npm run android
+#### More Than Just Technology—It’s About Trust & Security
 
-# OR using Yarn
-yarn android
-```
+This project isn’t just about IoT, sensors, and alerts. It’s about creating a future where women feel safer, knowing their homes are monitored and protected. It’s about giving them confidence and control over their surroundings, reducing anxiety, and ensuring help is always available when needed.
 
-### iOS
+---
 
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
+## System Overview
 
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
+### Mobile App (For Users and Neighbors)
 
-```sh
-bundle install
-```
+- Monitor home environment (temperature, humidity, smoke) in real time.
+- Receive alerts when a fire is detected nearby.
+- Users without the IoT device can still receive alerts if a neighbor's device detects a fire.
 
-Then, and every time you update your native dependencies, run:
+### Website (For Fire Authority)
 
-```sh
-bundle exec pod install
-```
+- Displays geolocation of all users with devices.
+- Provides access to a user database containing contact information and addresses.
+- Allows monitoring of temperature, smoke, and humidity levels in real time.
+- Monitor and respond to fire alerts.
 
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
+### IoT Device
 
-```sh
-# Using npm
-npm run ios
+- Built with ESP32, DHT22 (for temperature and humidity), and MQ-2 (for smoke detection).
+- Detects temperature, humidity, and smoke levels.
+- Sends alerts to both the user and fire station via Firebase Cloud Messaging (FCM).
+- Updates real-time data to Firebase, accessible through mobile and web apps.
 
-# OR using Yarn
-yarn ios
-```
+---
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+## How It Works
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+### ESP32 Monitors the Environment
 
-## Step 3: Modify your app
+- Reads smoke levels and temperature.
+- Sends data to Firebase in real-time.
 
-Now that you have successfully run the app, let's make changes!
+### Instant Notifications to Users, Neighbors, & Fire Stations
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+- Mobile app receives alerts via Firebase Cloud Messaging (FCM).
+- Neighbors receive alerts if a nearby device detects danger.
+- Web dashboard updates instantly.
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+---
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
+## IoT Device Code (MVP)
 
-## Congratulations! :tada:
+The IoT device code for the ESP32 integrates multiple components to enable real-time data transmission and alerting through Firebase:
 
-You've successfully run and modified your React Native App. :partying_face:
+1. **Wi-Fi Setup:** Configures the ESP32 to connect to a Wi-Fi network using provided credentials.
+2. **Firebase Integration:** Authenticates the device and connects to Firestore for real-time data storage.
+3. **Sensor Data Collection:** Uses the DHT22 sensor to measure temperature and humidity, and the MQ-2 sensor to detect smoke levels.
+4. **Data Transmission:** Sends collected data to Firebase, making it accessible through mobile and web apps.
+5. **Alert System:** Triggers Firebase Cloud Messaging (FCM) alerts to notify users, neighbors, and fire authorities via mobile and web apps when smoke levels exceed a predefined threshold.
 
-### Now what?
+These components work seamlessly to ensure continuous environmental monitoring and instant fire detection alerts.
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
+---
 
-# Troubleshooting
+## Technology Stack
 
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
+- **Mobile App:** React Native CLI with Firebase integration.
+- **Web App:** React with Firebase for real-time monitoring.
+- **IoT Device:** ESP32 with DHT22 and MQ-2 sensors, integrated with Firebase.
+- **Cloud:** Firebase for authentication, database, and notifications.
 
-# Learn More
+---
 
-To learn more about React Native, take a look at the following resources:
+## Usage
 
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+1. Power on the IoT device.
+2. Launch the mobile app to monitor your home or receive alerts.
+3. Fire authorities can use the web app to track alerts and monitor user data.
+
+For any issues or suggestions, please open an issue in the repository.
+
+
+## Program Flow (Mobile App)
+
+<div align="center">
+
+| Welcome Screen | Choose Type: Neighbor or User |
+|----------------|------------------------------|
+| ![Welcome Screen](https://github.com/user-attachments/assets/aed02182-05f4-4c67-baf1-be0dbfd6944e) | ![Choose Type](https://github.com/user-attachments/assets/00cc7e7a-e4ab-4b33-9120-5736b5f7b12b) |
+
+| Enter Registered Device | User Dashboard: Monitor Sensors |
+|-------------------------|--------------------------------|
+| ![Enter Registered Device](https://github.com/user-attachments/assets/b7df1f32-e225-4a65-80eb-31102743fb56) | ![User Dashboard](https://github.com/user-attachments/assets/7f3bca66-6002-42b5-b823-283d2fe4c35f) |
+
+| Choose Fire Station If Neighbor | Neighbor Dashboard |
+|--------------------------------|--------------------|
+| ![Choose Fire Station](https://github.com/user-attachments/assets/44f0a0fa-2258-45d3-9e42-1e2e3d7caaac) | ![image](https://github.com/user-attachments/assets/cd0a8113-1529-4788-a122-b07de1992601) |
+
+| Alarm Triggered (Foreground) | Alarm Triggered (Background) |
+|--------------------------------|--------------------|
+| ![image](https://github.com/user-attachments/assets/52d1a36f-0ab9-41e0-a0f8-664f8eaa4d31) | ![image](https://github.com/user-attachments/assets/2a0bc023-22b0-465a-8545-c0792e7600f2) |
+
+</div>
+
+
+Stay safe with **Alertech**! 🚨
