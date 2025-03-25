@@ -2,11 +2,6 @@
 
 ## Overview
 
-## Related Repositories
-- 🔥 [Alertech FCM API](https://github.com/DavidBatoDev/alertech-fcm-api) — The API for the FCM to send Notifications to all mobile app for users and neighbors to monitor alerts in real-time.
-- 🌐 [Alertech Fire Station Dashboard](https://github.com/geraldsberongoy/Arduino-Hackathon-Web) — The web dashboard for fire stations to monitor and respond to emergencies.
-- ⚙️ [Alertech IoT Device Code](https://github.com/DavidBatoDev/alertech-iot-device) — The ESP32 code for reading sensor data and sending alerts via Firebase.
-
 Alertech is an integrated fire detection and alert system composed of a mobile app, a website, and an IoT device. It enables real-time monitoring of temperature, humidity, and smoke levels, and provides instant alerts to users and fire authorities in case of a fire.
 
 ---
@@ -34,6 +29,11 @@ This project focuses on real-time fire and gas leak detection using ESP32 and Fi
 This project isn’t just about IoT, sensors, and alerts. It’s about creating a future where women feel safer, knowing their homes are monitored and protected. It’s about giving them confidence and control over their surroundings, reducing anxiety, and ensuring help is always available when needed.
 
 ---
+
+## Related Repositories
+- 🔥 [Alertech FCM API](https://github.com/DavidBatoDev/alertech-fcm-api) — The API for the FCM to send Notifications to all mobile app for users and neighbors to monitor alerts in real-time.
+- 🌐 [Alertech Fire Station Dashboard](https://github.com/geraldsberongoy/Arduino-Hackathon-Web) — The web dashboard for fire stations to monitor and respond to emergencies.
+- ⚙️ [Alertech IoT Device Code](https://github.com/DavidBatoDev/alertech-iot-device) — The ESP32 code for reading sensor data and sending alerts via Firebase.
 
 ## System Overview
 
