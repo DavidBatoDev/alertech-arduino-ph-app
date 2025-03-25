@@ -17,7 +17,7 @@ export default function DeviceIdScreen({ navigation }: Props) {
 
   const handleNext = () => {
     if (!deviceId.trim()) return;
-    if (deviceId == '123456') {
+    if (deviceId == 'alertech-app') {
       navigation.navigate('UserDashboard', { deviceId });
     } else {
       Alert.alert('Device ID not found', 'Please enter a valid Device ID', [{ text

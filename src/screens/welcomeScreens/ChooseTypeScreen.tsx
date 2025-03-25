@@ -101,7 +101,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   bulletPoint: {
-    fontSize: 20,
+    fontSize: 16,
     lineHeight: 22,
     marginRight: 8,
     // color: '#333',
@@ -109,7 +109,7 @@ const styles = StyleSheet.create({
   },
   bulletText: {
     flex: 1,
-    fontSize: 16,
+    fontSize: 14,
     // color: '#666',
     color: '#fff',
     lineHeight: 22,
